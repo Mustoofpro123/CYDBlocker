@@ -1,0 +1,16 @@
+{
+  "name": "CYDBlocker ESP32",
+  "version": "1.0.0",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        {
+          "path": "CYDBlocker-ESP32.merged.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
