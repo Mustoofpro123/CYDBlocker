@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CYDBlocker by Zard</title>
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <style>
+    body {
+      background: #101827;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px 15px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 18px;
+    }
+    select, button {
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      margin: 12px;
+    }
+    select { width: 90%; }
+    button {
+      background: #16a34a;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CYDBlocker</h1>
+    <p>Official Firmware Installer</p>
+    <p>by Zard</p>
+
+    <h3>Select your board</h3>
+    <select id="board">
+      <option value="esp32">ESP32 DevKit V1</option>
+      <option value="cyd">ESP32-2432S028 (CYD)</option>
+    </select>
+
+    <esp-web-install-button id="installer"
+      manifest="./firmware/esp32/manifest.json">
+      <button slot="activate">Install CYDBlocker</button>
+    </esp-web-install-button>
+
+    <p>Connect your ESP32 using a USB data cable.</p>
+  </div>
+
+  <script>
+    const board = document.getElementById("board");
+    const installer = document.getElementById("installer");
+
+    board.addEventListener("change", () => {
+      installer.setAttribute(
+        "manifest",
+        "./firmware/" + board.value + "/manifest.json"
+      );
+    });
+  </script>
+</body>
+</html>
