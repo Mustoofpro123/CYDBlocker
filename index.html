@@ -5,68 +5,242 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CYDBlocker by Zard</title>
-  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+
+  <script type="module"
+    src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module">
+  </script>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       background: #101827;
       color: white;
       font-family: Arial, sans-serif;
       text-align: center;
       padding: 50px 15px;
+      margin: 0;
     }
+
     .container {
       max-width: 500px;
       margin: auto;
       background: #1e293b;
       padding: 30px;
       border-radius: 18px;
+      border: 1px solid #334155;
     }
+
+    h1 {
+      color: #22d3ee;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+    }
+
     select, button {
       padding: 14px;
       border-radius: 10px;
       font-size: 16px;
-      margin: 12px;
+      margin: 12px 0;
     }
-    select { width: 90%; }
+
+    select {
+      width: 90%;
+      background: #0f172a;
+      color: white;
+      border: 1px solid #475569;
+    }
+
     button {
       background: #16a34a;
       color: white;
       border: none;
       cursor: pointer;
+      width: 90%;
+    }
+
+    button:hover {
+      background: #15803d;
+    }
+
+    .version-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 18px;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    .version {
+      color: #22d3ee;
+      font-size: 25px;
+      font-weight: bold;
+      margin: 10px;
+    }
+
+    .status {
+      color: #94a3b8;
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    .update {
+      color: #4ade80;
+      font-weight: bold;
+    }
+
+    .error {
+      color: #f87171;
+    }
+
+    .install-button {
+      display: block;
+      margin: 15px auto;
+    }
+
+    .install-button button {
+      background: #16a34a;
+      width: 90%;
+    }
+
+    footer {
+      margin-top: 25px;
+      color: #64748b;
+      font-size: 13px;
     }
   </style>
 </head>
+
 <body>
+
   <div class="container">
+
     <h1>CYDBlocker</h1>
-    <p>Official Firmware Installer</p>
+    <p class="subtitle">Official Firmware Installer</p>
     <p>by Zard</p>
 
     <h3>Select your board</h3>
+
     <select id="board">
       <option value="esp32">ESP32 DevKit V1</option>
       <option value="cyd">ESP32-2432S028 (CYD)</option>
     </select>
 
-    <esp-web-install-button id="installer"
+    <div class="version-card">
+      <h3>Latest Available Firmware</h3>
+
+      <div class="version" id="version">
+        Checking...
+      </div>
+
+      <p id="versionName">Loading firmware information...</p>
+
+      <p class="status" id="status">
+        Checking GitHub...
+      </p>
+
+      <button id="checkButton">
+        Check for Updates
+      </button>
+    </div>
+
+    <esp-web-install-button
+      id="installer"
+      class="install-button"
       manifest="./firmware/esp32/manifest.json">
-      <button slot="activate">Install CYDBlocker</button>
+
+      <button slot="activate">
+        Install / Update CYDBlocker
+      </button>
+
     </esp-web-install-button>
 
-    <p>Connect your ESP32 using a USB data cable.</p>
+    <p class="subtitle">
+      Connect your ESP32 using a USB data cable.
+    </p>
+
+    <footer>
+      CYDBlocker by Zard<br>
+      Official Firmware Installer
+    </footer>
+
   </div>
 
   <script>
     const board = document.getElementById("board");
     const installer = document.getElementById("installer");
 
-    board.addEventListener("change", () => {
-      installer.setAttribute(
-        "manifest",
-        "./firmware/" + board.value + "/manifest.json"
-      );
-    });
+    const versionElement = document.getElementById("version");
+    const versionName = document.getElementById("versionName");
+    const statusElement = document.getElementById("status");
+    const checkButton = document.getElementById("checkButton");
+
+    let currentManifest = "";
+
+    async function checkVersion() {
+      const selectedBoard = board.value;
+
+      const manifestPath =
+        "./firmware/" + selectedBoard + "/manifest.json";
+
+      currentManifest = manifestPath;
+
+      installer.setAttribute("manifest", manifestPath);
+
+      versionElement.textContent = "Checking...";
+      versionName.textContent = "Loading firmware information...";
+      statusElement.textContent = "Connecting to GitHub...";
+      statusElement.className = "status";
+
+      try {
+        const response = await fetch(
+          manifestPath + "?t=" + Date.now(),
+          { cache: "no-store" }
+        );
+
+        if (!response.ok) {
+          throw new Error("Could not find firmware manifest.");
+        }
+
+        const manifest = await response.json();
+
+        if (currentManifest !== manifestPath) return;
+
+        if (!manifest.version) {
+          throw new Error("Firmware version is missing.");
+        }
+
+        versionElement.textContent = "v" + manifest.version;
+
+        versionName.textContent =
+          selectedBoard === "cyd"
+            ? "CYDBlocker CYD Firmware"
+            : "CYDBlocker ESP32 Firmware";
+
+        statusElement.textContent =
+          "Latest published firmware version loaded.";
+
+        statusElement.className = "status update";
+
+      } catch (error) {
+        versionElement.textContent = "Unavailable";
+        versionName.textContent = "Could not load firmware information.";
+        statusElement.textContent = error.message;
+        statusElement.className = "status error";
+      }
+    }
+
+    board.addEventListener("change", checkVersion);
+
+    checkButton.addEventListener("click", checkVersion);
+
+    checkVersion();
   </script>
+
 </body>
 </html>
-   
