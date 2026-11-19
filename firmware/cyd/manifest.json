@@ -1,0 +1,16 @@
+{
+  "name": "CYDBlocker CYD",
+  "version": "3.0.0",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        {
+          "path": "CYDBlocker-CYD-v3.merged.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
